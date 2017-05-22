@@ -2,6 +2,8 @@ package main
 import (
 	"net"
 	"os"
+	"bytes"
+	"encoding/binary"
 )
 
 func main() {
@@ -19,7 +21,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	_, err = conn.Write([]byte(strEcho))
+	//_, err = conn.Write([]byte(strEcho))
+	_, err = conn.Write(msg())
 	if err != nil {
 		println("Write to server failed:", err.Error())
 		os.Exit(1)
@@ -38,4 +41,18 @@ func main() {
 	println("reply from server=", string(reply))
 
 	conn.Close()
+}
+
+func msg() []byte {
+	var buf bytes.Buffer
+	buf.Write(Int32ToBytes(1000))
+	buf.Write(Int32ToBytes(5))
+	buf.WriteString("hello")
+	return buf.Bytes()
+}
+
+func Int32ToBytes(i int32) []byte {
+	var buf = make([]byte, 4)
+	binary.LittleEndian.PutUint32(buf, uint32(i))
+	return buf
 }
