@@ -4,6 +4,8 @@ import (
 	"net"
 	"time"
 	"fmt"
+	"zhao.com/examples/proto3"
+	"github.com/golang/protobuf/proto"
 )
 
 type ServerConn struct {
@@ -12,8 +14,8 @@ type ServerConn struct {
 	conn   net.Conn	 //socket句柄
 	heart  int64	 //心跳
 	status int32     //连接状态, 0: 正常, 1:超时
-	latest int64 //最近一次发送消息的时间戳(非心跳)
-	name    string //连接名称
+	latest int64 	//最近一次发送消息的时间戳(非心跳)
+	name    string 	//连接名称
 }
 
 func NewServerConn(id int64, s *Server, c net.Conn) *ServerConn {
@@ -40,19 +42,15 @@ func (s *ServerConn) process() {
 
 	fmt.Println("======>>>2001:\t", ctx.Header)
 	fmt.Println("======>>>2002:\t", string(ctx.Body))
+	fn := getUnMarshalFunc(ctx.Header.rid)
 
-
-	//buf := make([]byte, 1024)
-	//// Read the incoming connection into the buffer.
-	//reqLen, err := s.conn.Read(buf)
-	//if err != nil {
-	//	fmt.Println("Error reading:", err.Error())
-	//}
-	//fmt.Println("=====>>001:\t", reqLen, string(buf))
-
+	data, err := fn(ctx.Body)
+	temp := &proto3.Page{}
+	proto.Unmarshal(data, temp)
+	fmt.Println("=======>>>2004:\t", temp, err)
 
 	// Send a response back to person contacting us.
-	s.conn.Write([]byte("Message received."))
+	s.conn.Write(data)
 	// Close the connection when you're done with it.
 	s.conn.Close()
 }
@@ -70,3 +68,6 @@ func (s *ServerConn) update() {
  * 处理请求消息
  * 处理心跳包/回调消息
  */
+//func (s *ServerConn) heart()  {
+//
+//}

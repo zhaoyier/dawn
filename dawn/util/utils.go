@@ -1,4 +1,4 @@
-package dawn
+package util
 
 import (
 	"encoding/binary"

@@ -4,6 +4,11 @@ import (
 	"os"
 	"bytes"
 	"encoding/binary"
+	"zhao.com/examples/proto3"
+	"github.com/golang/protobuf/proto"
+	//"fmt"
+	//"fmt"
+	"fmt"
 )
 
 func main() {
@@ -38,7 +43,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	println("reply from server=", string(reply))
+	//data := read(conn)
+	temp := &proto3.Page{}
+	proto.Unmarshal(reply, temp)
+
+	fmt.Println("reply from server=", temp)
+	//println("======>>001:\t", temp)
 
 	conn.Close()
 }
@@ -46,8 +56,12 @@ func main() {
 func msg() []byte {
 	var buf bytes.Buffer
 	buf.Write(Int32ToBytes(1000))
-	buf.Write(Int32ToBytes(5))
-	buf.WriteString("hello")
+	data, _ := proto.Marshal(&proto3.Page{
+		PageSize: 20,
+		PageNumber: 2,
+	})
+	buf.Write(Int32ToBytes(int32(len(data))))
+	buf.Write(data)
 	return buf.Bytes()
 }
 

@@ -6,15 +6,17 @@ package dawn
 import (
 	"net"
 	"flag"
+	"zhao.com/dawn/util"
+	"fmt"
 )
 
 func init() {
 	flag.Parse()
-	netIdentifier = NewAtomicInt64(0)
+	netIdentifier = util.NewAtomicInt64(0)
 }
 
 var (
-	netIdentifier *AtomicInt64
+	netIdentifier *util.AtomicInt64
 	tlsWrapper    func(net.Conn) net.Conn
 )
 
@@ -45,9 +47,10 @@ func (this *Server) Start(address string) error {
 			conn.Close()
 			continue
 		}
-		netid := netIdentifier.GetAndIncrement()
-		sc := NewServerConn(netid, this, conn)
-		this.conns.Put(netid, sc)
+		connID := netIdentifier.Increment()
+		fmt.Println("====>>.1001:\t", connID)
+		sc := NewServerConn(connID, this, conn)
+		this.conns.Put(connID, sc)
 
 		go func() {
 			//开始监听消息
