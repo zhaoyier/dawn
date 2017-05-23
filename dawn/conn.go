@@ -4,6 +4,7 @@ import (
 	"net"
 	"time"
 	"fmt"
+	"zhao.com/dawn/util"
 	"zhao.com/examples/proto3"
 	"github.com/golang/protobuf/proto"
 )
@@ -40,19 +41,33 @@ func (s *ServerConn) process() {
 		return
 	}
 
-	fmt.Println("======>>>2001:\t", ctx.Header)
-	fmt.Println("======>>>2002:\t", string(ctx.Body))
-	fn := getUnMarshalFunc(ctx.Header.rid)
+	data := make([]byte, 2048)
+	switch ctx.Header.rid {
+	case util.HEARTBEAT:
 
-	data, err := fn(ctx.Body)
-	temp := &proto3.Page{}
-	proto.Unmarshal(data, temp)
-	fmt.Println("=======>>>2004:\t", temp, err)
+	default:
+		data = Encode(ctx)
+	}
 
-	// Send a response back to person contacting us.
 	s.conn.Write(data)
-	// Close the connection when you're done with it.
 	s.conn.Close()
+
+	//fn := getUnMarshalFunc(ctx.Header.rid)
+	//if fn != nil {
+	//	//data, err := fn(ctx.Body)
+	//}
+	//
+	//data, err := fn(ctx.Body)
+	//temp := &proto3.Page{}
+	//proto.Unmarshal(data, temp)
+	//fmt.Println("=======>>>2004:\t", temp, err)
+
+	//data :=
+	//
+	//// Send a response back to person contacting us.
+	//s.conn.Write(data)
+	//// Close the connection when you're done with it.
+	//s.conn.Close()
 }
 
 /**

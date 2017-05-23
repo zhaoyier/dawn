@@ -21,13 +21,13 @@ var (
 )
 
 type Server struct {
-	conns  *ConnMap
+	clients  *ConnMap
 }
 
 //初始化服务信息
 func NewServer() *Server {
 	return &Server{
-		conns: NewConnMap(),
+		clients: NewConnMap(),
 	}
 }
 
@@ -43,14 +43,14 @@ func (this *Server) Start(address string) error {
 		if err != nil {	//连接失败,等待重新连接
 
 		}
-		if this.conns.Size() > 100 {
+		if this.clients.Size() > 100 {
 			conn.Close()
 			continue
 		}
 		connID := netIdentifier.Increment()
 		fmt.Println("====>>.1001:\t", connID)
 		sc := NewServerConn(connID, this, conn)
-		this.conns.Put(connID, sc)
+		this.clients.Put(connID, sc)
 
 		go func() {
 			//开始监听消息

@@ -6,7 +6,8 @@ import(
 	"bytes"
 	"errors"
 	"encoding/binary"
-	"fmt"
+	//"fmt"
+	"zhao.com/dawn/util"
 	"zhao.com/examples/proto3"
 	"github.com/golang/protobuf/proto"
 
@@ -45,7 +46,6 @@ func Decode(conn net.Conn) (*Context, error){
 	if err != nil {
 		return nil, errors.New("")
 	}
-	fmt.Println("======>>.3001:\t", msgType)
 	msgLen, err := ReadMsgLen(conn, MSG_BODY_SIZE)
 	if err != nil {
 		return nil, errors.New("")
@@ -53,7 +53,6 @@ func Decode(conn net.Conn) (*Context, error){
 	if msgLen > MSG_BODY_MAX {
 		return nil, errors.New("")
 	}
-	fmt.Println("======>>.3002:\t", msgLen)
 	msgBody := make([]byte, msgLen)
 	if _, err = io.ReadFull(conn, msgBody); err != nil {
 		return nil, errors.New("")
@@ -61,7 +60,6 @@ func Decode(conn net.Conn) (*Context, error){
 
 	temp := &proto3.Page{}
 	_ = proto.Unmarshal(msgBody, temp)
-	fmt.Printf("======>>.3003:%+v", temp)
 
 	return &Context{
 		conn: conn,
@@ -73,9 +71,24 @@ func Decode(conn net.Conn) (*Context, error){
 	}, nil
 }
 
-//func Encode(conn net.Conn)  {
-//
-//}
+func Encode(c *Context) []byte {
+	//执行接口函数
+	fn := getUnMarshalFunc(c.Header.rid)
+	if fn == nil {
+
+	}
+	data, err := fn(c.Body)
+	if err != nil {
+
+	}
+	//打包消息头
+	var buf bytes.Buffer
+	buf.Write(util.Int32ToBytes(c.Header.rid))
+	buf.Write(util.Int32ToBytes(int32(len(data))))
+	//打包消息体
+	buf.Write(data)
+	return buf.Bytes()
+}
 
 func ReadMsgLen(conn net.Conn, size int) (len int32, err error) {
 	bs := make([]byte, size)
