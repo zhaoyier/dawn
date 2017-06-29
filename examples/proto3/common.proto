@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package common;
-
-message Page {
-    int32 pageNumber = 1;
-    int32 pageSize = 2;
-}
